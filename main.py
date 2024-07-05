@@ -1,7 +1,9 @@
-from src.masks import get_mask_account, get_mask_card_number
+from src.widget import mask_account_card, mask_account, get_date
 
-numbers = input("Введите номер карты (16 цифр): ")
-bank_account = input("Введите номер счёта (6 цифр): ")
+name_numbers = input("Введите название и номер карты в формате Visa Classic XXXXXX...(16 цифр):\n")
+bank_account = f"Счёт {input("Введите номер счёта: ")}"
 
-print(get_mask_card_number(numbers))
-print(get_mask_account(bank_account))
+print(*mask_account_card(name_numbers))
+print(mask_account(bank_account))
+
+get_date(full_date_time="2024-03-11T02:26:18.671407")
