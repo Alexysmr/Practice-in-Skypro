@@ -2,16 +2,40 @@ def mask_account_card(name_numbers: str) -> any:
     """Функция получения названия и номера банковской карты и вывода в заданном формате"""
     card_numbers = []
     card_name = ""
-    symbols = ("=", "+", "-", "(", ")", "[", "]", "@", "!", "'", ".", ",",
-               "&", "?", "/", "<", ">", "*", ":", ";", "#", "№", '"', " ")
+    symbols = (
+        "=",
+        "+",
+        "-",
+        "(",
+        ")",
+        "[",
+        "]",
+        "@",
+        "!",
+        "'",
+        ".",
+        ",",
+        "&",
+        "?",
+        "/",
+        "<",
+        ">",
+        "*",
+        ":",
+        ";",
+        "#",
+        "№",
+        '"',
+        " ",
+    )
     if name_numbers != "":
-        for num in name_numbers:
-            if num.isdigit():
-                card_numbers.append(int(num))
-            elif num in symbols:
+        for element in name_numbers:
+            if element.isdigit():
+                card_numbers.append(int(element))
+            elif element in symbols:
                 card_name += " "
-            elif num.isalpha():
-                card_name += num
+            elif element.isalpha():
+                card_name += element
     else:
         card_name = "Отсутствует название карты. "
     card_name_cut = card_name.strip()
@@ -30,9 +54,9 @@ def mask_account_card(name_numbers: str) -> any:
 def mask_account(bank_user_account: str) -> str:
     """Функция получения банковского счёта и вывода в заданном формате"""
     account_numbers = []
-    for num in bank_user_account:
-        if num.isdigit():
-            account_numbers.append(int(num))
+    for element in bank_user_account:
+        if element.isdigit():
+            account_numbers.append(int(element))
     if len(account_numbers) == 20:
         mask = "".join(str(item) for item in account_numbers[0:])
         mask_account = f"Счёт **{mask[-4:]}"
@@ -44,15 +68,15 @@ def mask_account(bank_user_account: str) -> str:
 def get_date(full_date_time: str) -> str:
     """Функция изменения формата времени в заданный"""
     separate_date = ""
-    symbols = ("-", ".", "/", "*", ":")
+    symbols = (",", ".", "/", "*", ":", " ")
     if full_date_time != "":
-        n = 0
+        count = 0
         for element in full_date_time:
-            if n != 10:
+            if count != 10:
                 if element in symbols:
                     element = "-"
                 separate_date += element
-                n += 1
+                count += 1
     else:
         return "Ошибка ввода даты"
     intermediate = separate_date.split("-")
