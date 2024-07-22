@@ -95,8 +95,10 @@ descriptions = transaction_descriptions(transactions)
 
 
 def test_filter_by_currency(transactions_test, expected_transactions_test):
+    """Проверка функции фильтрации транзакций по признаку валюты"""
     pass
 
 
 def test_transaction_descriptions(transactions_test, expected_transaction_descriptions):
+    """Проверка функции вывода типа транзакции"""
     pass

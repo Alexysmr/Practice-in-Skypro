@@ -1,4 +1,4 @@
-def filter_by_currency(transactions: list > dict, currency: str) -> any > str:
+def filter_by_currency(transactions: list, currency: str) -> any:
     """Отбор транзакций по выбранной валюте"""
     if len(transactions) != 0:
         filtered_by_currency = list(
@@ -15,7 +15,7 @@ def filter_by_currency(transactions: list > dict, currency: str) -> any > str:
         return "Отсутствует база данных для обработки."
 
 
-def transaction_descriptions(transactions: list> dict) -> any > str:
+def transaction_descriptions(transactions: list) -> any:
     """Получение информации о произведённой транзакции"""
     if len(transactions) != 0:
         for element in transactions:
@@ -29,9 +29,7 @@ def transaction_descriptions(transactions: list> dict) -> any > str:
 def card_number_generator(start: int, stop: int, random=int) -> str:
     """Генерация случайного номера карты в заданном формате"""
     generate_random_number = []
-    for i in range(start, stop):
-        generate_random_number.append(random.randint(0, 9999))
-
+    [generate_random_number.append(random.randint(0, 9999)) for _ in range(start, stop)]
     random_number = (
         f"Номер карты: {generate_random_number[0]} {generate_random_number[1]} "
         f"{generate_random_number[2]} {generate_random_number[3]}"
