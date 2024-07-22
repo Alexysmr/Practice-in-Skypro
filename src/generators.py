@@ -1,4 +1,4 @@
-def filter_by_currency(transactions: list, currency: str) -> any:
+def filter_by_currency(transactions: list[dict], currency: str) -> any:
     """Отбор транзакций по выбранной валюте"""
     if len(transactions) != 0:
         filtered_by_currency = list(
@@ -15,7 +15,7 @@ def filter_by_currency(transactions: list, currency: str) -> any:
         return "Отсутствует база данных для обработки."
 
 
-def transaction_descriptions(transactions: list) -> any:
+def transaction_descriptions(transactions: list[dict]) -> any:
     """Получение информации о произведённой транзакции"""
     if len(transactions) != 0:
         for element in transactions:
