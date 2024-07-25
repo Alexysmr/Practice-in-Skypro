@@ -1,5 +1,6 @@
 import random
 
+from src.decorators import my_function
 from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
 
 transactions = [
@@ -62,3 +63,5 @@ for _ in range(5):
 start = 0
 stop = 4
 print(card_number_generator(start, stop, random))
+
+my_function(3, 2)
