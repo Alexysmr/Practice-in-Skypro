@@ -38,8 +38,8 @@ def log(filename: str | None = None) -> Callable:
 
 @log(filename="")
 def my_function(x: int, y: int) -> Any:
-    """Сложение"""
-    return x + y
+    """Суммирование"""
+    return x - y
 
 
 my_function(3, 0)

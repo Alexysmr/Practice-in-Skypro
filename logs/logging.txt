@@ -4,3 +4,28 @@
 my_function ok
 
 Конец работы
+Начало работы
+
+my_function ok
+
+Конец работы
+Начало работы
+
+my_function ok
+
+Конец работы
+Начало работы
+
+my_function ok
+
+Конец работы
+Начало работы
+
+my_function error: division by zero, Inputs: ((3, 0), {})
+
+Конец работы
+Начало работы
+
+my_function error: division by zero, Inputs: ((3, 0), {})
+
+Конец работы
