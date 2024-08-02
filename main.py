@@ -2,6 +2,7 @@ import random
 
 from src.decorators import my_function
 from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
+from src.utils import currency_exchange
 
 transactions = [
     {
@@ -65,3 +66,6 @@ stop = 4
 print(card_number_generator(start, stop, random))
 
 my_function(3, 2)
+
+filename = "operations4.json"  # Для использования заданного файла - из названия удалить цифру 4
+print("\n", currency_exchange(filename))
