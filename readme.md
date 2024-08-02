@@ -42,8 +42,8 @@
   `tests\test_processing.py`  
   `tasts\test_widget.py`  
   `tests\test_generators.py`  
-  `tests\test_decorators.py`
-  `tests\test_utils.py`
+  `tests\test_decorators.py`  
+  `tests\test_utils.py`  
   `tests\test_external_api.py`
   
 
