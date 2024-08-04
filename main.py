@@ -67,7 +67,7 @@ print(card_number_generator(start, stop, random))
 
 my_function(3, 2)
 
-try:
+try:  # Это на случай отключенного сетевого кабеля
     filename = "operations4.json"  # Для использования заданного файла - из названия удалить цифру 4
     transactions_data = input_transactions(filename)
     print("\n", currency_exchange(transactions_data))
