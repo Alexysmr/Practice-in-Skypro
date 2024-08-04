@@ -1,8 +1,8 @@
 import random
-
+import requests
 from src.decorators import my_function
 from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
-from src.utils import currency_exchange
+from src.utils2 import currency_exchange, input_transactions
 
 transactions = [
     {
@@ -67,5 +67,9 @@ print(card_number_generator(start, stop, random))
 
 my_function(3, 2)
 
-filename = "operations4.json"  # Для использования заданного файла - из названия удалить цифру 4
-print("\n", currency_exchange(filename))
+try:
+    filename = "operations4.json"  # Для использования заданного файла - из названия удалить цифру 4
+    transactions_data = input_transactions(filename)
+    print("\n", currency_exchange(transactions_data))
+except requests.exceptions.ConnectionError:
+    print("\nОшибка! Отсутствует подключение к сети")
