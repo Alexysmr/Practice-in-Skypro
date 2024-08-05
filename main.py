@@ -2,7 +2,7 @@ import random
 import requests
 from src.decorators import my_function
 from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
-from src.utils2 import currency_exchange, input_transactions
+from src.utils import currency_exchange, input_transactions
 
 transactions = [
     {
