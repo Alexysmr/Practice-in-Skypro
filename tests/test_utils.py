@@ -35,10 +35,11 @@ def test_currency_exchange(mock_request):
     data1 = input_transactions("operations1.json")  # operations1.json - содержит список [1, 4, 5]
     data2 = input_transactions("operations2.json")  # "operations2.json" не существует
     data3 = input_transactions("operations3.json")  # operations3.json - содержит простой текст, не список
-    # data4 = input_transactions("operations4.json")  # operations4.json содержит часть operations.json - 4 транзакции
+    data4 = input_transactions("operations4.json")  # operations4.json содержит часть operations.json - 4 транзакции
     mock_request.return_value.status_code = 200
+    mock_request.return_value.json.return_value = {"result": 91.32654187}
     assert currency_exchange(data0) == ['Отсутствуют данные транзакций']
-    assert currency_exchange(data1) == ['Ошибка получения курса валют']
+    assert currency_exchange(data1) == ['Отсутствуют данные транзакций']
     assert currency_exchange(data2) == ['Отсутствуют данные транзакций']
     assert currency_exchange(data3) == ['Отсутствуют данные транзакций']
-    # assert currency_exchange(data4) == [31957.58, 709722.81, 848078.43, 7335508.94]
+    assert currency_exchange(data4) == [31957.58, 750829.29, 897198.34, 7225292.97]
