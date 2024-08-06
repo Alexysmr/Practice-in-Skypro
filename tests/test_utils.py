@@ -1,7 +1,5 @@
 from unittest.mock import Mock
 from unittest.mock import patch
-
-import src.utils
 from src.utils import currency_exchange, input_transactions
 
 
