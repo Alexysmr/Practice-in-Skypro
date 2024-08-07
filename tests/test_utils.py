@@ -26,18 +26,25 @@ def test_input_transactions():
          'to': 'Счет 75651667383060284188'}]
 
 
+# @patch()
 @patch('src.utils.requests.request')
 def test_currency_exchange(mock_request):
     """Тест функции конвертации валюты"""
-    data0 = input_transactions("operations0.json")  # operations0.json - пустой
-    data1 = input_transactions("operations1.json")  # operations1.json - содержит список [1, 4, 5]
-    data2 = input_transactions("operations2.json")  # "operations2.json" не существует
-    data3 = input_transactions("operations3.json")  # operations3.json - содержит простой текст, не список
-    data4 = input_transactions("operations4.json")  # operations4.json содержит часть operations.json - 4 транзакции
+    from src.utils import input_transactions
+    data0 = input_transactions("operations4.json")  # operations4.json содержит часть operations.json - 4 транзакции
+    mock_data = Mock(return_value=[""])
+    input_transactions = mock_data
+    data1 = input_transactions()
+    mock_data = Mock(return_value=[1, 4, 5])
+    input_transactions = mock_data
+    data2 = input_transactions()
+    mock_data = Mock(return_value=["Просто текст"])
+    input_transactions = mock_data
+    data3 = input_transactions()
     mock_request.return_value.status_code = 200
     mock_request.return_value.json.return_value = {"result": 91.32654187}
-    assert currency_exchange(data0) == ['Отсутствуют данные транзакций']
+    assert currency_exchange(data0) == [31957.58, 750829.29, 897198.34, 7225292.97]
     assert currency_exchange(data1) == ['Отсутствуют данные транзакций']
     assert currency_exchange(data2) == ['Отсутствуют данные транзакций']
     assert currency_exchange(data3) == ['Отсутствуют данные транзакций']
-    assert currency_exchange(data4) == [31957.58, 750829.29, 897198.34, 7225292.97]
+    mock_data.assert_called()
