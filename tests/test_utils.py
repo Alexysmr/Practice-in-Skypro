@@ -31,20 +31,22 @@ def test_input_transactions():
 def test_currency_exchange(mock_request):
     """Тест функции конвертации валюты"""
     from src.utils import input_transactions
-    data0 = input_transactions("operations4.json")  # operations4.json содержит часть operations.json - 4 транзакции
+    data0 = input_transactions("operations2.json")  # файл не существует
+    data1 = input_transactions("operations4.json")  # operations4.json содержит часть operations.json - 4 транзакции
     mock_data = Mock(return_value=[""])
     input_transactions = mock_data
-    data1 = input_transactions()
+    data2 = input_transactions()
     mock_data = Mock(return_value=[1, 4, 5])
     input_transactions = mock_data
-    data2 = input_transactions()
+    data3 = input_transactions()
     mock_data = Mock(return_value=["Просто текст"])
     input_transactions = mock_data
-    data3 = input_transactions()
+    data4 = input_transactions()
     mock_request.return_value.status_code = 200
     mock_request.return_value.json.return_value = {"result": 91.32654187}
-    assert currency_exchange(data0) == [31957.58, 750829.29, 897198.34, 7225292.97]
-    assert currency_exchange(data1) == ['Отсутствуют данные транзакций']
+    assert currency_exchange(data0) == ['Отсутствуют данные транзакций']
+    assert currency_exchange(data1) == [31957.58, 750829.29, 897198.34, 7225292.97]
     assert currency_exchange(data2) == ['Отсутствуют данные транзакций']
     assert currency_exchange(data3) == ['Отсутствуют данные транзакций']
+    assert currency_exchange(data4) == ['Отсутствуют данные транзакций']
     mock_data.assert_called()
