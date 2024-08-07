@@ -1,9 +1,10 @@
 import json
-import requests
 import os
 import os.path
 from pathlib import Path
 from typing import Any
+
+import requests
 from dotenv import load_dotenv
 
 

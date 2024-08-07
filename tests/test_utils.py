@@ -1,5 +1,5 @@
-from unittest.mock import Mock
-from unittest.mock import patch
+from unittest.mock import Mock, patch
+
 from src.utils import currency_exchange, input_transactions
 
 
@@ -9,7 +9,7 @@ def test_input_transactions():
     assert input_transactions("operations1.json") == [1, 4, 5]  # operations1.json - содержит список [1, 4, 5]
     assert input_transactions("operations2.json") == []  # operations2.json не существует
     assert input_transactions("operations3.json") == []  # operations3.json - содержит простой текст, не список
-    assert input_transactions("operations4.json") == [  # operations4.json содержит часть operations.json - 4 транзакции
+    assert input_transactions("operations4.json") == [  # operations4.json содержит часть operations.json- 4 транзакции
         {'id': 441945886, 'state': 'EXECUTED', 'date': '2019-08-26T10:50:58.294041',
          'operationAmount': {'amount': '31957.58', 'currency': {'name': 'руб.', 'code': 'RUB'}},
          'description': 'Перевод организации', 'from': 'Maestro 1596837868705199', 'to': 'Счет 64686473678894779589'},
@@ -50,3 +50,6 @@ def test_currency_exchange(mock_request):
     assert currency_exchange(data3) == ['Отсутствуют данные транзакций']
     assert currency_exchange(data4) == ['Отсутствуют данные транзакций']
     mock_data.assert_called()
+    mock_request.assert_called_with('GET',
+                                    'https://api.apilayer.com/exchangerates_data/convert?to=RUB&from=USD&amount=1',
+                                    headers={'apikey': 'qxgt1CEGVTEl6SNThf69vg2XWfyWwuMf'}, data={})
