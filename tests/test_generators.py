@@ -1,7 +1,6 @@
 import pytest
-
-from main import transactions
-from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
+# from main import transactions
+# from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
 
 
 @pytest.fixture
@@ -91,7 +90,7 @@ def expected_transaction_descriptions():
 
 
 # currency_transactions = filter_by_currency(transactions, "USD")
-descriptions = transaction_descriptions(transactions)
+# descriptions = transaction_descriptions(transactions)
 
 
 def test_filter_by_currency(transactions_test, expected_transactions_test):

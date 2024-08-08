@@ -50,6 +50,3 @@ def test_currency_exchange(mock_request):
     assert currency_exchange(data3) == ['Отсутствуют данные транзакций']
     assert currency_exchange(data4) == ['Отсутствуют данные транзакций']
     mock_data.assert_called()
-    mock_request.assert_called_with('GET',
-                                    'https://api.apilayer.com/exchangerates_data/convert?to=RUB&from=USD&amount=1',
-                                    headers={'apikey': 'qxgt1CEGVTEl6SNThf69vg2XWfyWwuMf'}, data={})

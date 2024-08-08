@@ -1,7 +1,7 @@
 import os
 import os.path
-from pathlib import Path
 from functools import wraps
+from pathlib import Path
 from typing import Any, Callable
 
 main_path = Path(__file__).resolve().parents[1]
