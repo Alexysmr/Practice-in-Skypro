@@ -1,7 +1,8 @@
 import random
-
 from src.decorators import my_function
 from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
+from src.masks import get_mask_account, get_mask_card_number
+from src.utils import currency_exchange, input_transactions
 
 transactions = [
     {
@@ -65,3 +66,10 @@ stop = 4
 print(card_number_generator(start, stop, random))
 
 my_function(3, 2)
+
+print(get_mask_card_number())
+print(get_mask_account())
+
+filename = "operations4.json"  # Для использования заданного файла - из названия удалить цифру 4
+transactions_data = input_transactions(filename)
+print("\n", currency_exchange(transactions_data))
