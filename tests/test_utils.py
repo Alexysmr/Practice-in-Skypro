@@ -26,7 +26,6 @@ def test_input_transactions():
          'to': 'Счет 75651667383060284188'}]
 
 
-# @patch()
 @patch('src.utils.requests.request')
 def test_currency_exchange(mock_request):
     """Тест функции конвертации валюты"""

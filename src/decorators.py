@@ -7,7 +7,8 @@ from typing import Any, Callable
 main_path = Path(__file__).resolve().parents[1]
 path = os.path.join(main_path, "logs", "logging.txt")
 flags = os.O_RDWR | os.O_CREAT
-os.remove(path)
+if os.path.exists(path):
+    os.remove(path)
 log_file = os.open(path, flags)
 
 

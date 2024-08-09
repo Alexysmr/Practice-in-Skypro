@@ -1,7 +1,4 @@
 import random
-
-import requests
-
 from src.decorators import my_function
 from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
 from src.masks import get_mask_account, get_mask_card_number
@@ -70,17 +67,9 @@ print(card_number_generator(start, stop, random))
 
 my_function(3, 2)
 
+print(get_mask_card_number())
+print(get_mask_account())
 
-numbers = input("Введите номер карты (16 цифр): ")
-bank_account = input("Введите номер счёта (6 цифр): ")
-
-print(get_mask_card_number(numbers))
-print(get_mask_account(bank_account))
-
-
-try:  # Это на случай отключенного сетевого кабеля
-    filename = "operations4.json"  # Для использования заданного файла - из названия удалить цифру 4
-    transactions_data = input_transactions(filename)
-    print("\n", currency_exchange(transactions_data))
-except requests.exceptions.ConnectionError:
-    print("\nОшибка! Отсутствует подключение к сети")
+filename = "operations4.json"  # Для использования заданного файла - из названия удалить цифру 4
+transactions_data = input_transactions(filename)
+print("\n", currency_exchange(transactions_data))
