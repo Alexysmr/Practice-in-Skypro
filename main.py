@@ -1,8 +1,9 @@
-import random
-from src.decorators import my_function
-from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
-from src.masks import get_mask_account, get_mask_card_number
-from src.utils import currency_exchange, input_transactions
+#  import random
+#  from src.decorators import my_function
+#  from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
+#  from src.masks import get_mask_account, get_mask_card_number
+#  from src.utils import currency_exchange, input_transactions
+from src.work_with_csv_xlsx import reading_csv, reading_xlsx
 
 transactions = [
     {
@@ -52,24 +53,30 @@ transactions = [
     },
 ]
 
-currency_transactions = filter_by_currency(transactions, "USD")
-descriptions = transaction_descriptions(transactions)
+#  currency_transactions = filter_by_currency(transactions, "USD")
+#  descriptions = transaction_descriptions(transactions)
 
-for _ in range(2):
-    print(next(currency_transactions, "Информации о транзакции больше не обнаружено."))
+#  for _ in range(2):
+#      print(next(currency_transactions, "Информации о транзакции больше не обнаружено."))
 
-for _ in range(5):
-    print(next(descriptions))
+#  for _ in range(5):
+#      print(next(descriptions))
 
-start = 0
-stop = 4
-print(card_number_generator(start, stop, random))
+#  start = 0
+#  stop = 4
+#  print(card_number_generator(start, stop, random))
 
-my_function(3, 2)
+#  my_function(3, 2)
 
-print(get_mask_card_number())
-print(get_mask_account())
+#  print(get_mask_card_number())
+#  rint(get_mask_account())
 
-filename = "operations4.json"  # Для использования заданного файла - из названия удалить цифру 4
-transactions_data = input_transactions(filename)
-print("\n", currency_exchange(transactions_data))
+#  filename = "operations4.json"  # Для использования заданного файла - из названия удалить цифру 4
+#  transactions_data = input_transactions(filename)
+#  print("\n", currency_exchange(transactions_data))
+
+file_name_csv = "transactions.csv"
+file_name_xlsx = "transactions_excel.xlsx"
+
+reading_csv(file_name_csv)
+reading_xlsx(file_name_xlsx)
