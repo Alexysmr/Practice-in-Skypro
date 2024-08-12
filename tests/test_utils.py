@@ -43,9 +43,9 @@ def test_currency_exchange(mock_request):
     data4 = input_transactions()
     mock_request.return_value.status_code = 200
     mock_request.return_value.json.return_value = {"result": 91.32654187}
-    assert currency_exchange(data0) == ['Отсутствуют данные транзакций']
+    assert currency_exchange(data0) == 'Работа программы завершена с ошибкой: Отсутствуют данные транзакций.'
     assert currency_exchange(data1) == [31957.58, 750829.29, 897198.34, 7225292.97]
-    assert currency_exchange(data2) == ['Отсутствуют данные транзакций']
-    assert currency_exchange(data3) == ['Отсутствуют данные транзакций']
-    assert currency_exchange(data4) == ['Отсутствуют данные транзакций']
+    assert currency_exchange(data2) == 'Работа программы завершена с ошибкой: Отсутствуют данные транзакций.'
+    assert currency_exchange(data3) == 'Работа программы завершена с ошибкой: Отсутствуют данные транзакций.'
+    assert currency_exchange(data4) == 'Работа программы завершена с ошибкой: Отсутствуют данные транзакций.'
     mock_data.assert_called()

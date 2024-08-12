@@ -1,7 +1,7 @@
 import pytest
 
-# from main import transactions
-# from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
+from main import transactions
+from src.generators import filter_by_currency, transaction_descriptions
 
 
 @pytest.fixture
@@ -56,6 +56,16 @@ def transactions_test():
 
 
 @pytest.fixture
+def transactions_test_empty():
+    return [{}]
+
+
+@pytest.fixture
+def expected_transactions_test_empty():
+    return "Отсутствует база данных для обработки."
+
+
+@pytest.fixture
 def expected_transactions_test():
     return [
         {
@@ -90,15 +100,17 @@ def expected_transaction_descriptions():
     ]
 
 
-# currency_transactions = filter_by_currency(transactions, "USD")
-# descriptions = transaction_descriptions(transactions)
+currency_transactions = filter_by_currency(transactions, "USD")
+descriptions = transaction_descriptions(transactions)
 
 
-def test_filter_by_currency(transactions_test, expected_transactions_test):
+def test_filter_by_currency(transactions_test, transactions_test_empty, expected_transactions_test,
+                            expected_transactions_test_empty):
     """Проверка функции фильтрации транзакций по признаку валюты"""
     pass
 
 
-def test_transaction_descriptions(transactions_test, expected_transaction_descriptions):
+def test_transaction_descriptions(transactions_test, transactions_test_empty, expected_transaction_descriptions,
+                                  expected_transactions_test_empty):
     """Проверка функции вывода типа транзакции"""
     pass

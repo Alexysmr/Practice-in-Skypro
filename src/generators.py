@@ -3,7 +3,8 @@ def filter_by_currency(transactions: list[dict], currency: str) -> any:
     if len(transactions) != 0:
         filtered_by_currency = list(
             filter(
-                lambda transactions: transactions.get("operationAmount").get("currency").get("code") == currency,
+                lambda transactions: transactions.get("operationAmount", "").get("currency", "").get("code",
+                                                                                                     "") == currency,
                 transactions,
             )
         )
@@ -19,7 +20,7 @@ def transaction_descriptions(transactions: list[dict]) -> any:
     """Получение информации о произведённой транзакции"""
     if len(transactions) != 0:
         for element in transactions:
-            cell = element.get("description")
+            cell = element.get("description", "")
             yield cell
 
     else:

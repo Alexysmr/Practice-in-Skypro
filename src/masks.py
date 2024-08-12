@@ -10,17 +10,16 @@ file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
 
 
-def get_mask_card_number() -> str:
+def get_mask_card_number(numbers) -> str:
     """Функция получения номера банковской карты и вывода в заданном формате"""
     logger.info('Старт')
-    numbers = input('Введите номер карты (16 цифр): ')
     logger.info(f'Получаем номер карты от пользователя: {numbers}')
     card_numbers = []
     logger.info('Обрабатываем полученные данные')
     try:
         for num in numbers:
-            # if num.isdigit():  Даём возможность проявится ошибке
-            card_numbers.append(int(num))
+            if num.isdigit():  # Даём возможность проявится ошибке
+                card_numbers.append(int(num))
         if len(card_numbers) == 16:
             first_group = "".join(str(item) for item in card_numbers[0:4])
             second_group = "".join(str(item) for item in card_numbers[4:6])
@@ -36,17 +35,16 @@ def get_mask_card_number() -> str:
         return 'Введён некорректный номер карты'
 
 
-def get_mask_account() -> str:
+def get_mask_account(bank_account) -> str:
     """Функция получения банковского счёта и вывода в заданном формате"""
     logger.info('Старт')
-    bank_account = input("Введите номер счёта (20 цифр): ")
     logger.info(f'Получаем номер счёта от пользователя: {bank_account}')
     account_numbers = []
     logger.info('Обрабатываем полученные данные')
     try:
         for num in bank_account:
-            # if num.isdigit():   Даём возможность проявится ошибке
-            account_numbers.append(int(num))
+            if num.isdigit():  # Даём возможность проявится ошибке
+                account_numbers.append(int(num))
         if len(account_numbers) == 20:
             mask = "".join(str(item) for item in account_numbers[0:])
             mask_account = f"**{mask[-4:]}"
