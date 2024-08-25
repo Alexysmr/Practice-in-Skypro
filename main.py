@@ -1,84 +1,213 @@
-# import random
-# from src.decorators import my_function
-# from src.generators import card_number_generator, filter_by_currency, transaction_descriptions
-# from src.masks import get_mask_account, get_mask_card_number
-# from src.utils import currency_exchange, input_transactions
-from src.work_with_csv_xlsx import reading_csv, reading_xlsx
+import logging
+import os.path
+import re
+import numpy as np
 
-transactions = [
-    {
-        "id": 939719570,
-        "state": "EXECUTED",
-        "date": "2018-06-30T02:08:58.425572",
-        "operationAmount": {"amount": "9824.07", "currency": {"name": "USD", "code": "USD"}},
-        "description": "Перевод организации",
-        "from": "Счет 75106830613657916952",
-        "to": "Счет 11776614605963066702",
-    },
-    {
-        "id": 142264268,
-        "state": "EXECUTED",
-        "date": "2019-04-04T23:20:05.206878",
-        "operationAmount": {"amount": "79114.93", "currency": {"name": "USD", "code": "USD"}},
-        "description": "Перевод со счета на счет",
-        "from": "Счет 19708645243227258542",
-        "to": "Счет 75651667383060284188",
-    },
-    {
-        "id": 873106923,
-        "state": "EXECUTED",
-        "date": "2019-03-23T01:09:46.296404",
-        "operationAmount": {"amount": "43318.34", "currency": {"name": "руб.", "code": "RUB"}},
-        "description": "Перевод со счета на счет",
-        "from": "Счет 44812258784861134719",
-        "to": "Счет 74489636417521191160",
-    },
-    {
-        "id": 895315941,
-        "state": "EXECUTED",
-        "date": "2018-08-19T04:27:37.904916",
-        "operationAmount": {"amount": "56883.54", "currency": {"name": "USD", "code": "USD"}},
-        "description": "Перевод с карты на карту",
-        "from": "Visa Classic 6831982476737658",
-        "to": "Visa Platinum 8990922113665229",
-    },
-    {
-        "id": 594226727,
-        "state": "CANCELED",
-        "date": "2018-09-12T21:27:25.241689",
-        "operationAmount": {"amount": "67314.70", "currency": {"name": "руб.", "code": "RUB"}},
-        "description": "Перевод организации",
-        "from": "Visa Platinum 1246377376343588",
-        "to": "Счет 14211924144426031657",
-    },
-]
+from src.the_executive_module import read_transactions_data, filter_by_status, final_calculation
+from src.masks import get_mask_card_number
+from src.widget import get_date
 
-# currency_transactions = filter_by_currency(transactions, "USD")
-# descriptions = transaction_descriptions(transactions)
+shablon_1 = "\n1 -Получить информацию о транзакциях из JSON-файла" \
+            "\n2 -Получить информацию о транзакциях из CSV-файла" \
+            "\n3 -Получить информацию о транзакциях из XLSX-файла\n->: "
+list_input = ["1", "2", "3", "4", "5"]
+list_status = ["EXECUTED", "CANCELED", "PENDING"]
+description_type = ['Перевод с карты на карту', 'Перевод с карты на счет',
+                    'Перевод со счета на счет', 'Перевод организации', 'Открытие вклада']
 
-# for _ in range(2):
-#     print(next(currency_transactions, "Информации о транзакции больше не обнаружено."))
+main_path = os.getcwd()
+logger = logging.getLogger('__name__')
+logger.setLevel(logging.DEBUG)
+file_handler = logging.FileHandler(f'{main_path}/logs/main_polygon.log', 'w', encoding="utf-8")
+file_formatter = logging.Formatter('%(asctime)s %(filename)s %(levelname)s %(funcName)s %(lineno)d: %(message)s')
+file_handler.setFormatter(file_formatter)
+logger.addHandler(file_handler)
+logger.info("Старт кода")
 
-# for _ in range(5):
-#     print(next(descriptions))
 
-# start = 0
-# stop = 4
-# print(card_number_generator(start, stop, random))
+def main():
+    """Основная функци взаимодействия с пользователем"""
+    x = None
+    choice = {"description": "-"}
+    transactions_by_status = []
+    search_line = ["", ""]
+    file_type = input("Здравствуйте! Добро пожаловать в программу работы с банковскими транзакциями."
+                      f"\nВыберите номер необходимого пункта меню\n{shablon_1}")
+    n = 0
+    while file_type != list_input[0] and file_type != list_input[1] and file_type != list_input[2]:
+        n += 1
+        if n <= 2:
+            file_type = input(f"Выбор некорректен, "
+                              f"попробуйте ещё раз ввести номер необходимого пункта{shablon_1}")
+            logger.info(f"Повторный выбор пользователя {file_type}")
+        else:
+            file_type = list_input[1]
+            print("По умолчанию:")
+            logger.info("По умолчанию выбран CSV-файл")
 
-# my_function(3, 2)
+    if file_type == list_input[0]: print("Для получения данных о транзакциях выбран JSON-файл.")
+    if file_type == list_input[1]: print("Для получения данных о транзакциях выбран CSV-файл.")
+    if file_type == list_input[2]: print("Для получения данных о транзакциях выбран XLSX-файл.")
 
-# numbers = input('Введите номер карты (16 цифр): ')
-# bank_account = input("Введите номер счёта (20 цифр): ")
-# print(get_mask_card_number(numbers))
-# print(get_mask_account())
+    # Выбор фильтра
+    search_line[0] = "state"
+    search_line[1] = input(
+        f"Введите статус по которому необходимо выполнить фильтрацию.\n"
+        f"Доступные для фильтрации статусы:\n{list_status[0]}\n{list_status[1]}\n{list_status[2]}\n->: ").upper()
+    logger.info(f"Выбор пользователя {search_line[1]}")
+    n = 0
+    while search_line[1] not in list_status:
+        n += 1
+        if n <= 2:
+            search_line[1] = input(f"Выбор некорректен, попробуйте ещё раз ввести доступные для фильтрации статусы:"
+                                   f"\n{list_status[0]}\n{list_status[1]}\n{list_status[2]}\n->: ").upper()
+            logger.info(f"Повторный выбор пользователя {search_line[1]}")
+        else:
+            search_line[1] = list_status[0]
+            print(f'По умолчанию выбран статус {search_line[1]}')
+            logger.info(f"По умолчанию выбран статус {search_line[1]}.")
 
-#  filename = "operations4.json"  # Для использования заданного файла - из названия удалить цифру 4
-#  transactions_data = input_transactions(filename)
-#  print("\n", currency_exchange(transactions_data))
+    if file_type == "1":  # Получение данных из JSON по статусу
+        loaded_data = read_transactions_data("operations.json", file_type)
+        logger.info("JSON выбран, проверен, загружен.")
+        transactions_by_status = filter_by_status(loaded_data, search_line)
+        for i in transactions_by_status:
+            i["amount"] = i.get('operationAmount').get('amount', "-")
+            i["currency_name"] = i.get('operationAmount').get('currency').get('name', "-")
+            i["currency_code"] = i.get('operationAmount').get('currency').get('code', "-")
+            i.pop('operationAmount')
 
-file_name_csv = "transactions.csv"
-file_name_xlsx = "transactions_excel.xlsx"
+    if file_type == "2":  # Получение данных из CSV  по статусу
+        loaded_data = read_transactions_data("transactions.csv", file_type)
+        logger.info("CSV выбран, проверен, загружен.")
+        transactions_by_status = filter_by_status(loaded_data, search_line)
 
-reading_csv(file_name_csv)
-reading_xlsx(file_name_xlsx)
+    if file_type == "3":  # Получение данных из XLSX по статусу
+        loaded_data = read_transactions_data("transactions_excel.xlsx", file_type)
+        logger.info("XLSX выбран, проверен, загружен.")
+        transactions_by_status = filter_by_status(loaded_data, search_line)
+
+    for i in transactions_by_status:  # Сокрытие номеров карт и счетов маской
+        if i.get("from"):
+            if i["from"] is not np.nan and i["from"] is not float or type(i["from"]) is not None \
+                    or i["from"] != "" or i["from"] != " ":
+                bank_cell_from = i["from"]
+                try:
+                    if re.search("Счет", bank_cell_from, flags=0):
+                        bank_account_from = "".join(str(item) for item in bank_cell_from[-4:])
+                        result_from = re.sub(r'\b\d{20}\b', f"**{bank_account_from}", bank_cell_from)
+                        i["from"] = result_from
+                    else:
+                        numbers = "".join(str(item) for item in bank_cell_from[-16:])
+                        result_from = re.sub(r'\b\d{16}\b', get_mask_card_number(numbers), bank_cell_from)
+                        i["from"] = result_from
+                except Exception as ex:
+                    print("Ошибка from")
+                    logger.error(f"{i["id"]} Ошибка {ex}. Продолжаем")
+                    continue
+            else:
+                i["from"] = "-"
+        if i.get("to"):
+            if type(i.get("to")) is not np.nan and i.get("to") is not float or i.get("to") != "" \
+                    or i.get("to") != " ":
+                bank_cell_to = i["to"]
+                try:
+                    if re.search("Счет", bank_cell_to, flags=0):
+                        bank_account_to = "".join(str(item) for item in bank_cell_to[-4:])
+                        result_to = re.sub(r'\b\d{20}\b', f"**{bank_account_to}", bank_cell_to)
+                        i["to"] = result_to
+                    else:
+                        numbers = "".join(str(item) for item in bank_cell_to[-16:])
+                        result_to = re.sub(r'\b\d{16}\b', get_mask_card_number(numbers), bank_cell_to)
+                        i["to"] = result_to
+                except Exception as ex:
+                    print("Ошибка to")
+                    logger.error(f"Ошибка {ex}. Продолжаем")
+                    continue
+            else:
+                i["to"] = "-"
+    logger.info("Сокрытие номеров карт и счетов выполнено через модуль masks")
+
+    answer_by_date = input(  # Упорядочивание по дате
+        "Упорядочить транзакции по дате?(да - упорядочить, иное - нет) ->: ").lower()
+    if answer_by_date == "да" or answer_by_date == "lf":
+        answer_vector_by_date = input("Упорядочить по дате по возрастанию/убыванию? ->: ").lower()
+        if answer_vector_by_date == "убыванию" or answer_vector_by_date == "e,sdfyb.":
+            reverse_parametr = True
+            print("Упорядочиваем по дате по убыванию")
+            logger.info("Упорядочиваем по дате по убыванию")
+        else:
+            reverse_parametr = False
+            print("Упорядочиваем по дате по возрастанию")
+        transactions_by_status = sorted(transactions_by_status, key=lambda z: z['date'], reverse=reverse_parametr)
+        logger.info("Упорядочили по дате по возрастанию")
+    else:
+        logger.info("Выбор пользователя - без упорядочивания по дате.")
+
+    for i in transactions_by_status:  # Преобразование даты в заданный формат
+        full_date_time = i.get("date", "")
+        correct_date = get_date(full_date_time)
+        i["date"] = correct_date
+    logger.info("Выполнено преобразование даты в заданный формат")
+
+    # Фильтрация рублевых транзакций - да/нет
+    answer_filtered_rub = input("Выводить только рублевые транзакции? (да - выводить, иное - нет) ->: ").lower()
+    if answer_filtered_rub == "lf" or answer_filtered_rub == "да": choice["currency_code"] = "RUB"
+    logger.info(f"Выбор пользователя по выводу только рублевых транзакций {answer_filtered_rub}")
+
+    # Фильтрация транзакций по типу операций
+    answer_description = input("Произвести подсчёт транзакций по типу операции?\n"
+                               "(да - фильтровать, иное -нет) ->: ").lower()
+    if answer_description == "lf" or answer_filtered_rub == "да":
+        logger.info(f"Выбор пользователя фильтрации по типу операции {answer_description}")
+        number_choice = input(f"Введите номер типа операции по которому необходимо выполнить фильтрацию.\n"
+                              f"Доступные типы операций для фильтрации:\n1 -{description_type[0]}"
+                              f"\n2 -{description_type[1]}\n3 -{description_type[2]}\n4 -{description_type[3]}"
+                              f"\n5 -{description_type[4]}\n ->: ").lower()
+        n = 0
+        while number_choice not in list_input:
+            n += 1
+            if n <= 2:
+                number_choice = input(f"Выбор некорректен, попробуйте ещё раз ввести доступный тип операции для"
+                                      f" фильтрации:\n1 -{description_type[0]}\n2 -{description_type[1]}"
+                                      f"\n3 -{description_type[2]}\n4 -{description_type[3]}"
+                                      f"\n5 -{description_type[4]}\n ->: ").lower()
+                logger.info(f"Повторный выбор пользователя {number_choice}")
+            else:
+                number_choice = list_status[0]
+                print(f'По умолчанию выбран статус {number_choice}')
+                logger.info(f"По умолчанию выбран статус {number_choice}.")
+        if number_choice == "1": choice["description"] = description_type[0]
+        if number_choice == "2": choice["description"] = description_type[1]
+        if number_choice == "3": choice["description"] = description_type[2]
+        if number_choice == "4": choice["description"] = description_type[3]
+        if number_choice == "5": choice["description"] = description_type[4]
+        final_countdown, count_category = final_calculation(transactions_by_status, choice)
+        logger.info("Данные из final_calculation возвращены")
+        for i in count_category:
+            x = count_category[i]
+        print(f"\nРаспечатываю итоговый список транзакций:\n\nВсего банковских операций в выборке: {x}")
+        for i in final_countdown:
+            if i.get("description") == "Открытие вклада" and i.get("from") is np.nan or i.get("from") == "":
+                i["from"] = ""
+            else:
+                i["from"] = str(i["from"]) + " -> "
+            print(f"\nid: {int(i["id"])} {i["date"]} {i["description"]}\n{i["from"]}{i["to"]}\n{i["amount"]} "
+                  f"{i["currency_name"]}")
+            logger.info("Программа выполнена через final_calculation")
+    else:
+        print(f"\nРаспечатываю итоговый список транзакций:\n\nВсего банковских операций в выборке: "
+              f"{len(transactions_by_status)}")
+        for i in transactions_by_status:
+            if i.get("description") == "Открытие вклада" and i.get("from") is np.nan or i.get("from") is None \
+                    or i.get("from") == "-" or i.get("from") == "":
+                i["from"] = ""
+            else:
+                i["from"] = str(i.get("from")) + " -> "
+            print(f"\nid: {int(i["id"])} {i["date"]} {i["description"]}\n{i["from"]}{i["to"]}\n{i["amount"]} \
+                  {i["currency_name"]}")
+            logger.info("Программа выполнена по более простому сценарию")
+
+
+if __name__ == '__main__':
+    main()

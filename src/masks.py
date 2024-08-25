@@ -28,7 +28,7 @@ def get_mask_card_number(numbers) -> str:
             logger.info(f'Программа выполнена и завершена: {mask_number}')
             return mask_number
         else:
-            logger.info('Произошла ошибка ввода! Программа завершена.')
+            logger.info('Ошибка ввода! Функция завершена.')
             return 'Введён некорректный номер карты'
     except Exception as ex:
         logger.error(f"Ошибка {ex}")
@@ -48,11 +48,11 @@ def get_mask_account(bank_account) -> str:
         if len(account_numbers) == 20:
             mask = "".join(str(item) for item in account_numbers[0:])
             mask_account = f"**{mask[-4:]}"
-            logger.info(f'Программа выполнена и завершена: {mask_account}')
+            logger.info(f'Функция выполнена и завершена: {mask_account}')
             return mask_account
         else:
-            logger.info('Произошла ошибка ввода! Программа завершена.')
+            logger.info('Ошибка ввода! Функция завершена.')
             return "Введён некорректный номер счёта"
     except Exception as ex:
-        logger.error(f"Ошибка {ex}. Программа завершена.")
+        logger.error(f"Ошибка {ex}. Функция завершена.")
         return "Введён некорректный номер счёта"
