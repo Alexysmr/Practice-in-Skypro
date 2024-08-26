@@ -1,11 +1,12 @@
-import os.path
-import json
 import csv
-import logging
-import re
 import itertools
+import json
+import logging
+import os.path
+import re
 from collections import Counter
 from pathlib import Path
+
 import numpy as np
 import pandas as pd
 
@@ -52,7 +53,7 @@ def read_transactions_data(file_name: str, file_type: str) -> dict | str:
             return loaded_data
 
 
-def filter_by_status(loaded_data: list | dict, search_line: list[str]) -> list[dict]:
+def filter_by_status(loaded_data: list | dict, search_line: str) -> list[dict]:
     """Функция отбора данных по статусу "EXECUTED", "CANCELED", "PENDING" """
     filtered_data = []
     logger.info("Старт")
@@ -67,8 +68,8 @@ def filter_by_status(loaded_data: list | dict, search_line: list[str]) -> list[d
             continue
         else:
             try:
-                x = loaded_data[i][search_line[0]]
-                if re.fullmatch(search_line[1], x):
+                x = loaded_data[i]["state"]
+                if re.fullmatch(search_line, x):
                     filtered_data.append(loaded_data[i])
                     # print(filtered_data[i])
             except Exception as ex:
@@ -78,11 +79,11 @@ def filter_by_status(loaded_data: list | dict, search_line: list[str]) -> list[d
                 # print(f"ОШИБКА {ex} - {loaded_data[i]}")
                 continue
     if len(filtered_data) == 0:
-        logger.info(f"Данных со статусом {search_line[1]} не обнаружено.")
-        exit(f"Данных со статусом {search_line[1]} не обнаружено.\nРабота программы завершена.")
+        logger.info(f"Данных со статусом {search_line} не обнаружено.")
+        exit(f"Данных со статусом {search_line} не обнаружено.\nРабота программы завершена.")
     else:
-        logger.info(f"Операции отфильтрованы по статусу {search_line[1]} и возвращены. Функция завершена.")
-        print("Операции отфильтрованы по статусу", ''.join(search_line[1]))
+        logger.info(f"Операции отфильтрованы по статусу {search_line} и возвращены. Функция завершена.")
+        print("Операции отфильтрованы по статусу", ''.join(search_line))
     return filtered_data
 
 

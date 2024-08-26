@@ -1,10 +1,11 @@
 import logging
 import os.path
 import re
+
 import numpy as np
 
-from src.the_executive_module import read_transactions_data, filter_by_status, final_calculation
 from src.masks import get_mask_card_number
+from src.the_executive_module import filter_by_status, final_calculation, read_transactions_data
 from src.widget import get_date
 
 shablon_1 = "\n1 -Получить информацию о транзакциях из JSON-файла" \
@@ -50,22 +51,21 @@ def main():
     if file_type == list_input[2]: print("Для получения данных о транзакциях выбран XLSX-файл.")
 
     # Выбор фильтра
-    search_line[0] = "state"
-    search_line[1] = input(
+    search_line = input(
         f"Введите статус по которому необходимо выполнить фильтрацию.\n"
         f"Доступные для фильтрации статусы:\n{list_status[0]}\n{list_status[1]}\n{list_status[2]}\n->: ").upper()
-    logger.info(f"Выбор пользователя {search_line[1]}")
+    logger.info(f"Выбор пользователя {search_line}")
     n = 0
-    while search_line[1] not in list_status:
+    while search_line not in list_status:
         n += 1
         if n <= 2:
-            search_line[1] = input(f"Выбор некорректен, попробуйте ещё раз ввести доступные для фильтрации статусы:"
+            search_line = input(f"Выбор некорректен, попробуйте ещё раз ввести доступные для фильтрации статусы:"
                                    f"\n{list_status[0]}\n{list_status[1]}\n{list_status[2]}\n->: ").upper()
-            logger.info(f"Повторный выбор пользователя {search_line[1]}")
+            logger.info(f"Повторный выбор пользователя {search_line}")
         else:
-            search_line[1] = list_status[0]
-            print(f'По умолчанию выбран статус {search_line[1]}')
-            logger.info(f"По умолчанию выбран статус {search_line[1]}.")
+            search_line = list_status[0]
+            print(f'По умолчанию выбран статус {search_line}')
+            logger.info(f"По умолчанию выбран статус {search_line}.")
 
     if file_type == "1":  # Получение данных из JSON по статусу
         loaded_data = read_transactions_data("operations.json", file_type)
@@ -192,7 +192,7 @@ def main():
                 i["from"] = ""
             else:
                 i["from"] = str(i["from"]) + " -> "
-            print(f"\nid: {int(i["id"])} {i["date"]} {i["description"]}\n{i["from"]}{i["to"]}\n{i["amount"]} "
+            print(f"\n{i["date"]} {i["description"]}\n{i["from"]}{i["to"]}\n{i["amount"]} "
                   f"{i["currency_name"]}")
             logger.info("Программа выполнена через final_calculation")
     else:
@@ -204,7 +204,7 @@ def main():
                 i["from"] = ""
             else:
                 i["from"] = str(i.get("from")) + " -> "
-            print(f"\nid: {int(i["id"])} {i["date"]} {i["description"]}\n{i["from"]}{i["to"]}\n{i["amount"]} \
+            print(f"\n{i["date"]} {i["description"]}\n{i["from"]}{i["to"]}\n{i["amount"]} \
                   {i["currency_name"]}")
             logger.info("Программа выполнена по более простому сценарию")
 
