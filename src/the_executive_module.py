@@ -20,28 +20,36 @@ file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
 
 
-def read_transactions_data(file_name: str, file_type: str) -> dict | str:
-    """Функция получения данных по типу файла данных"""
-    logger.info(f"Старт. Выбран тип файла {file_type}")
+def read_transactions_data(file_name: str) -> dict | str:
+    """Функция получения и подготовки данных по типу файла данных"""
+    logger.info(f"Старт. Выбран файл {file_name}")
     file_path = os.path.join(main_path, "data", file_name)
     if os.path.exists(file_path) and os.stat(file_path).st_size != 0:
         with open(file_path, encoding="utf-8") as f:
-            if file_type == "1":
+            if re.search(r"\b\w+\.json\b", file_name):
                 json_data = json.load(f)
                 if isinstance(json_data, list):
                     loaded_data = json_data
+                    for i in loaded_data:
+                        if len(i) != 0:
+                            i["amount"] = i.get('operationAmount').get('amount', "")
+                            i["currency_name"] = i.get('operationAmount').get('currency').get('name', "")
+                            i["currency_code"] = i.get('operationAmount').get('currency').get('code', "")
+                            i.pop('operationAmount')
+                        else:
+                            continue
                     logger.info("JSON считан, преобразован")
                 else:
                     logger.info("Данных в формате list[dict] в JSON файле отсутствуют")
                     loaded_data = "Отсутствуют данные выбранного формата"
 
-            elif file_type == "2":
+            elif re.search(r"\b\w+\.csv\b", file_name):
                 loaded_data = []
                 for row in csv.DictReader(f, delimiter=';'):
                     loaded_data.append(row)
                 logger.info("CSV считан, преобразован")
 
-            elif file_type == "3":
+            elif re.search(r"\b\w+\.xlsx\b", file_name):
                 loaded_data = []
                 readed_data = pd.read_excel(file_path, sheet_name=0, header=0, index_col=None, na_values=['', ' '],
                                             keep_default_na=False, na_filter=True)
@@ -54,7 +62,7 @@ def read_transactions_data(file_name: str, file_type: str) -> dict | str:
 
 
 def filter_by_status(loaded_data: list | dict, search_line: str) -> list[dict]:
-    """Функция отбора данных по статусу "EXECUTED", "CANCELED", "PENDING" """
+    """Функция фильтрации данных по статусу "EXECUTED", "CANCELED", "PENDING" """
     filtered_data = []
     logger.info("Старт")
     for i in range(0, len(loaded_data)):
@@ -69,9 +77,8 @@ def filter_by_status(loaded_data: list | dict, search_line: str) -> list[dict]:
         else:
             try:
                 x = loaded_data[i]["state"]
-                if re.fullmatch(search_line, x):
+                if re.search(search_line, x):
                     filtered_data.append(loaded_data[i])
-                    # print(filtered_data[i])
             except Exception as ex:
                 logger.error(
                     f"ОШИБКА: {ex}- {loaded_data[i]}, тип словаря: {type(loaded_data[i])}, "

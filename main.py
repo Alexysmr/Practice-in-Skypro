@@ -12,6 +12,7 @@ shablon_1 = "\n1 -Получить информацию о транзакция�
             "\n2 -Получить информацию о транзакциях из CSV-файла" \
             "\n3 -Получить информацию о транзакциях из XLSX-файла\n->: "
 list_input = ["1", "2", "3", "4", "5"]
+filename_list = ["operations.json", "transactions.csv", "transactions_excel_1.xlsx"]
 list_status = ["EXECUTED", "CANCELED", "PENDING"]
 description_type = ['Перевод с карты на карту', 'Перевод с карты на счет',
                     'Перевод со счета на счет', 'Перевод организации', 'Открытие вклада']
@@ -19,7 +20,7 @@ description_type = ['Перевод с карты на карту', 'Перев�
 main_path = os.getcwd()
 logger = logging.getLogger('__name__')
 logger.setLevel(logging.DEBUG)
-file_handler = logging.FileHandler(f'{main_path}/logs/main_polygon.log', 'w', encoding="utf-8")
+file_handler = logging.FileHandler(f'{main_path}/logs/main.log', 'w', encoding="utf-8")
 file_formatter = logging.Formatter('%(asctime)s %(filename)s %(levelname)s %(funcName)s %(lineno)d: %(message)s')
 file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
@@ -30,102 +31,71 @@ def main():
     """Основная функци взаимодействия с пользователем"""
     x = None
     choice = {"description": "-"}
-    transactions_by_status = []
-    search_line = ["", ""]
-    file_type = input("Здравствуйте! Добро пожаловать в программу работы с банковскими транзакциями."
-                      f"\nВыберите номер необходимого пункта меню\n{shablon_1}")
+    f_type = input("Здравствуйте! Добро пожаловать в программу работы с банковскими транзакциями."
+                   f"\nВыберите номер необходимого пункта меню\n{shablon_1}")
     n = 0
-    while file_type != list_input[0] and file_type != list_input[1] and file_type != list_input[2]:
+    while f_type != list_input[0] and f_type != list_input[1] and f_type != list_input[2]:
         n += 1
         if n <= 2:
-            file_type = input(f"Выбор некорректен, "
-                              f"попробуйте ещё раз ввести номер необходимого пункта{shablon_1}")
-            logger.info(f"Повторный выбор пользователя {file_type}")
+            f_type = input(f"Выбор некорректен, "
+                           f"попробуйте ещё раз ввести номер необходимого пункта{shablon_1}")
+            logger.info(f"Повторный выбор пользователя {f_type}")
         else:
-            file_type = list_input[1]
+            f_type = list_input[1]
             print("По умолчанию:")
             logger.info("По умолчанию выбран CSV-файл")
 
-    if file_type == list_input[0]: print("Для получения данных о транзакциях выбран JSON-файл.")
-    if file_type == list_input[1]: print("Для получения данных о транзакциях выбран CSV-файл.")
-    if file_type == list_input[2]: print("Для получения данных о транзакциях выбран XLSX-файл.")
+    if f_type == list_input[0]: print("Для обработки выбран JSON-файл")
+    if f_type == list_input[1]: print("Для обработки выбран CSV-файл.")
+    if f_type == list_input[2]: print("Для обработки выбран XLSX-файл.")
+    u = int(f_type) - 1
+    loaded_data = read_transactions_data(filename_list[u])  # Получение списка словарей транзакций из файла
 
     # Выбор фильтра
     search_line = input(
         f"Введите статус по которому необходимо выполнить фильтрацию.\n"
-        f"Доступные для фильтрации статусы:\n{list_status[0]}\n{list_status[1]}\n{list_status[2]}\n->: ").upper()
+        f"Доступные для фильтровки статусы: {list_status[0]}, {list_status[1]}, {list_status[2]}\n->: ").upper()
     logger.info(f"Выбор пользователя {search_line}")
     n = 0
     while search_line not in list_status:
         n += 1
         if n <= 2:
-            search_line = input(f"Выбор некорректен, попробуйте ещё раз ввести доступные для фильтрации статусы:"
-                                   f"\n{list_status[0]}\n{list_status[1]}\n{list_status[2]}\n->: ").upper()
+            search_line = input(f"Статус операции {search_line} недоступен. Введите статус, по которому необходимо "
+                                f"выполнить фильтрацию.\nДоступные для фильтровки статусы:"
+                                f" {list_status[0]}, {list_status[1]}, {list_status[2]}\n->: ").upper()
             logger.info(f"Повторный выбор пользователя {search_line}")
         else:
             search_line = list_status[0]
             print(f'По умолчанию выбран статус {search_line}')
             logger.info(f"По умолчанию выбран статус {search_line}.")
 
-    if file_type == "1":  # Получение данных из JSON по статусу
-        loaded_data = read_transactions_data("operations.json", file_type)
-        logger.info("JSON выбран, проверен, загружен.")
-        transactions_by_status = filter_by_status(loaded_data, search_line)
-        for i in transactions_by_status:
-            i["amount"] = i.get('operationAmount').get('amount', "-")
-            i["currency_name"] = i.get('operationAmount').get('currency').get('name', "-")
-            i["currency_code"] = i.get('operationAmount').get('currency').get('code', "-")
-            i.pop('operationAmount')
-
-    if file_type == "2":  # Получение данных из CSV  по статусу
-        loaded_data = read_transactions_data("transactions.csv", file_type)
-        logger.info("CSV выбран, проверен, загружен.")
-        transactions_by_status = filter_by_status(loaded_data, search_line)
-
-    if file_type == "3":  # Получение данных из XLSX по статусу
-        loaded_data = read_transactions_data("transactions_excel.xlsx", file_type)
-        logger.info("XLSX выбран, проверен, загружен.")
-        transactions_by_status = filter_by_status(loaded_data, search_line)
+    transactions_by_status = filter_by_status(loaded_data, search_line)  # Фильтрация по статусу
 
     for i in transactions_by_status:  # Сокрытие номеров карт и счетов маской
         if i.get("from"):
-            if i["from"] is not np.nan and i["from"] is not float or type(i["from"]) is not None \
-                    or i["from"] != "" or i["from"] != " ":
-                bank_cell_from = i["from"]
-                try:
-                    if re.search("Счет", bank_cell_from, flags=0):
-                        bank_account_from = "".join(str(item) for item in bank_cell_from[-4:])
-                        result_from = re.sub(r'\b\d{20}\b', f"**{bank_account_from}", bank_cell_from)
-                        i["from"] = result_from
-                    else:
-                        numbers = "".join(str(item) for item in bank_cell_from[-16:])
-                        result_from = re.sub(r'\b\d{16}\b', get_mask_card_number(numbers), bank_cell_from)
-                        i["from"] = result_from
-                except Exception as ex:
-                    print("Ошибка from")
-                    logger.error(f"{i["id"]} Ошибка {ex}. Продолжаем")
-                    continue
-            else:
-                i["from"] = "-"
+            bank_cell_from = i["from"]
+            try:
+                if re.search("Счет", bank_cell_from, flags=0):
+                    bank_account_from = "".join(str(item) for item in bank_cell_from[-4:])
+                    i["from"] = re.sub(r'\b\d{20}\b', f"**{bank_account_from}", bank_cell_from)
+                else:
+                    numbers = "".join(str(item) for item in bank_cell_from[-16:])
+                    i["from"] = re.sub(r'\b\d{16}\b', get_mask_card_number(numbers), bank_cell_from)
+            except Exception as ex:
+                logger.error(f"{i["id"]} Ошибка {ex}. Продолжаем")
+                continue
         if i.get("to"):
-            if type(i.get("to")) is not np.nan and i.get("to") is not float or i.get("to") != "" \
-                    or i.get("to") != " ":
-                bank_cell_to = i["to"]
-                try:
-                    if re.search("Счет", bank_cell_to, flags=0):
-                        bank_account_to = "".join(str(item) for item in bank_cell_to[-4:])
-                        result_to = re.sub(r'\b\d{20}\b', f"**{bank_account_to}", bank_cell_to)
-                        i["to"] = result_to
-                    else:
-                        numbers = "".join(str(item) for item in bank_cell_to[-16:])
-                        result_to = re.sub(r'\b\d{16}\b', get_mask_card_number(numbers), bank_cell_to)
-                        i["to"] = result_to
-                except Exception as ex:
-                    print("Ошибка to")
-                    logger.error(f"Ошибка {ex}. Продолжаем")
-                    continue
-            else:
-                i["to"] = "-"
+            bank_cell_to = i["to"]
+            try:
+                if re.search("Счет", bank_cell_to, flags=0):
+                    bank_account_to = "".join(str(item) for item in bank_cell_to[-4:])
+                    i["to"] = re.sub(r'\b\d{20}\b', f"**{bank_account_to}", bank_cell_to)
+                else:
+                    numbers = "".join(str(item) for item in bank_cell_to[-16:])
+                    i["to"] = re.sub(r'\b\d{16}\b', get_mask_card_number(numbers), bank_cell_to)
+            except Exception as ex:
+                logger.error(f"Ошибка {ex}. Продолжаем")
+                continue
     logger.info("Сокрытие номеров карт и счетов выполнено через модуль masks")
 
     answer_by_date = input(  # Упорядочивание по дате
@@ -140,7 +110,7 @@ def main():
             reverse_parametr = False
             print("Упорядочиваем по дате по возрастанию")
         transactions_by_status = sorted(transactions_by_status, key=lambda z: z['date'], reverse=reverse_parametr)
-        logger.info("Упорядочили по дате по возрастанию")
+        logger.info(f"Упорядочили по дате по {answer_vector_by_date}")
     else:
         logger.info("Выбор пользователя - без упорядочивания по дате.")
 
@@ -153,7 +123,7 @@ def main():
     # Фильтрация рублевых транзакций - да/нет
     answer_filtered_rub = input("Выводить только рублевые транзакции? (да - выводить, иное - нет) ->: ").lower()
     if answer_filtered_rub == "lf" or answer_filtered_rub == "да": choice["currency_code"] = "RUB"
-    logger.info(f"Выбор пользователя по выводу только рублевых транзакций {answer_filtered_rub}")
+    logger.info(f"Выбор пользователя по выводу только рублевых транзакций: {answer_filtered_rub}")
 
     # Фильтрация транзакций по типу операций
     answer_description = input("Произвести подсчёт транзакций по типу операции?\n"
@@ -204,8 +174,7 @@ def main():
                 i["from"] = ""
             else:
                 i["from"] = str(i.get("from")) + " -> "
-            print(f"\n{i["date"]} {i["description"]}\n{i["from"]}{i["to"]}\n{i["amount"]} \
-                  {i["currency_name"]}")
+            print(f"\n{i["date"]} {i["description"]}\n{i["from"]}{i["to"]}\n{i["amount"]} {i["currency_name"]}")
             logger.info("Программа выполнена по более простому сценарию")
 
 
