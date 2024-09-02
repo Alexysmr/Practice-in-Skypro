@@ -20,18 +20,19 @@ file_handler.setFormatter(file_formatter)
 logger.addHandler(file_handler)
 
 
-def read_transactions_data(file_name: str) -> dict | str:
-    """Функция получения и подготовки данных по типу файла данных"""
+def read_transactions_data(file_name: str) -> list[dict | str]:
+    """Функция чтения и подготовки данных по типу файла данных"""
     logger.info(f"Старт. Выбран файл {file_name}")
     file_path = os.path.join(main_path, "data", file_name)
+    loaded_data = []
     if os.path.exists(file_path) and os.stat(file_path).st_size != 0:
         with open(file_path, encoding="utf-8") as f:
             if re.search(r"\b\w+\.json\b", file_name):
                 json_data = json.load(f)
-                if isinstance(json_data, list):
-                    loaded_data = json_data
-                    for i in loaded_data:
-                        if len(i) != 0:
+                if isinstance(json_data, list) and len(json_data) != 0:
+                    prima_data = json_data
+                    for i in prima_data:
+                        if isinstance(i, dict) and len(i) != 0:
                             i["amount"] = i.get('operationAmount').get('amount', "")
                             i["currency_name"] = i.get('operationAmount').get('currency').get('name', "")
                             i["currency_code"] = i.get('operationAmount').get('currency').get('code', "")
@@ -41,24 +42,35 @@ def read_transactions_data(file_name: str) -> dict | str:
                     logger.info("JSON считан, преобразован")
                 else:
                     logger.info("Данных в формате list[dict] в JSON файле отсутствуют")
-                    loaded_data = "Отсутствуют данные выбранного формата"
 
             elif re.search(r"\b\w+\.csv\b", file_name):
-                loaded_data = []
+                prima_data = []
                 for row in csv.DictReader(f, delimiter=';'):
-                    loaded_data.append(row)
+                    prima_data.append(row)
                 logger.info("CSV считан, преобразован")
 
             elif re.search(r"\b\w+\.xlsx\b", file_name):
-                loaded_data = []
+                prima_data = []
                 readed_data = pd.read_excel(file_path, sheet_name=0, header=0, index_col=None, na_values=['', ' '],
                                             keep_default_na=False, na_filter=True)
                 transform_data = readed_data.to_dict('index')
                 for i in transform_data:
-                    loaded_data.append(transform_data[i])
+                    prima_data.append(transform_data[i])
                 logger.info("XLSX считан, преобразован")
+            for i in prima_data:
+                if isinstance(i, dict) and len(i) != 0:
+                    for key, value in i.items():
+                        if type(value) is float and value is np.nan or value == " " or value == "":
+                            i[key] = ""
+                    if i.get("id") and i.get("state") and i.get("date") and i.get("to") and i.get("description") != "":
+                        loaded_data.append(i)
+                    else:
+                        continue
             logger.info("Данные возвращены. Функция завершена")
-            return loaded_data
+            return loaded_data if len(loaded_data) != 0 else exit(
+                "Выбранный файл отсутствует или не содержит необходимой информациии.\nРабота программы завершена.")
+    else:
+        exit("Выбранный файл отсутствует или не содержит необходимой информациии.\nРабота программы завершена.")
 
 
 def filter_by_status(loaded_data: list | dict, search_line: str) -> list[dict]:
@@ -66,25 +78,14 @@ def filter_by_status(loaded_data: list | dict, search_line: str) -> list[dict]:
     filtered_data = []
     logger.info("Старт")
     for i in range(0, len(loaded_data)):
-        m = loaded_data[i]
-        for key, value in m.items():
-            # print(key, value, len(str(value)), type(value))
-            if type(value) is float and value is np.nan or value == " " or value == "":
-                loaded_data[i][key] = ""
-        if len(loaded_data[i]) == 0 or loaded_data[i]["date"] == "" or loaded_data[i]["state"] == "":
-            logger.info(f"Длина словаря: {len(loaded_data[i])}.Пустая строка detected")
+        try:
+            x = loaded_data[i]["state"]
+            if re.search(search_line, x):
+                filtered_data.append(loaded_data[i])
+        except Exception as ex:
+            logger.error(f"ОШИБКА: {ex}- {loaded_data[i]}, тип словаря: {type(loaded_data[i])}, "
+                         f"Длина словаря: {len(loaded_data[i])}. Продолжаем")
             continue
-        else:
-            try:
-                x = loaded_data[i]["state"]
-                if re.search(search_line, x):
-                    filtered_data.append(loaded_data[i])
-            except Exception as ex:
-                logger.error(
-                    f"ОШИБКА: {ex}- {loaded_data[i]}, тип словаря: {type(loaded_data[i])}, "
-                    f"Длина словаря: {len(loaded_data[i])}. Продолжаем")
-                # print(f"ОШИБКА {ex} - {loaded_data[i]}")
-                continue
     if len(filtered_data) == 0:
         logger.info(f"Данных со статусом {search_line} не обнаружено.")
         exit(f"Данных со статусом {search_line} не обнаружено.\nРабота программы завершена.")
