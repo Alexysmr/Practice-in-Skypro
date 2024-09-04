@@ -1,13 +1,14 @@
 import os
 import os.path
-from pathlib import Path
 from functools import wraps
+from pathlib import Path
 from typing import Any, Callable
 
 main_path = Path(__file__).resolve().parents[1]
 path = os.path.join(main_path, "logs", "logging.txt")
 flags = os.O_RDWR | os.O_CREAT
-os.remove(path)
+if os.path.exists(path):
+    os.remove(path)
 log_file = os.open(path, flags)
 
 
@@ -38,7 +39,7 @@ def log(filename: str | None = None) -> Callable:
 
 @log(filename="")
 def my_function(x: int, y: int) -> Any:
-    """Сложение"""
+    """Суммирование"""
     return x + y
 
 

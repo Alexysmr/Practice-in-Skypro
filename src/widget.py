@@ -69,7 +69,7 @@ def get_date(full_date_time: str) -> str:
     """Функция изменения формата времени в заданный"""
     separate_date = ""
     symbols = (",", ".", "/", "*", ":", " ")
-    if full_date_time != "":
+    if len(full_date_time) != 0 and full_date_time != "-":
         count = 0
         for element in full_date_time:
             if count != 10:
