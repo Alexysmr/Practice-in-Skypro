@@ -1,8 +1,7 @@
 from collections import Counter
-
 import pytest
 
-from src.the_executive_module import filter_by_status, final_calculation, read_transactions_data
+from src.the_executive_module import filter_by_status, final_calculation, filter_by_description, read_transactions_data
 
 filename_list = ["operations4.json", "operations0.json", "operations1.json", "transactions_0.csv",
                  "transactions_excel_0.xlsx", "prosto.file", "transactions_1.csv", "transactions_excel_1.xlsx"]
@@ -87,6 +86,21 @@ def filterd_csv_by_executed():
 
 
 @pytest.fixture
+def filterd_by_description():
+    return [{'amount': 16210.0, 'currency_code': 'PEN', 'currency_name': 'Sol', 'date': '2023-09-05T11:30:32Z',
+             'description': 'Перевод организации', 'from': 'Счет 58803664561298323391', 'id': 650703.0,
+             'state': 'EXECUTED',
+             'to': 'Счет 39745660563456619397'},
+            {'amount': 29553.0, 'currency_code': 'CNY', 'currency_name': 'Yuan Renminbi',
+             'date': '2021-11-27T00:46:09Z',
+             'description': 'Перевод организации', 'from': 'American Express 6477627838877562', 'id': 632926.0,
+             'state': 'PENDING', 'to': 'Счет 88381741644903346269'},
+            {'amount': 16101.0, 'currency_code': 'COP', 'currency_name': 'Peso', 'date': '2020-08-15T15:35:06Z',
+             'description': 'Перевод организации', 'from': 'American Express 7606039262578692', 'id': 1408892.0,
+             'state': 'EXECUTED', 'to': 'Счет 35266864227613549441'}]
+
+
+@pytest.fixture
 def expected_wrong_read_transactions_data():
     return "Выбранный файл отсутствует или не содержит необходимой информациии.\nРабота программы завершена."
 
@@ -131,13 +145,21 @@ def test_filter_by_status(expected_csv_read_transactions_data, filterd_csv_by_ex
     assert str(message.value) == f"Данных со статусом {search_line[2]} не обнаружено.\nРабота программы завершена."
 
 
+def test_filter_by_description(expected_xlsx_read_transactions_data, filterd_by_description):
+    assert (filter_by_description(expected_xlsx_read_transactions_data, 'Перевод организации')
+            == filterd_by_description)
+    with pytest.raises(SystemExit) as message:
+        filter_by_description(expected_xlsx_read_transactions_data, 'Перевод со счета на счет')
+    assert str(message.value) == 'Транзакции типа Перевод со счета на счет отсутствуют.\nРабота программы завершена.'
+
+
 def test_final_calculation(filterd_csv_by_executed, expected_final_calculation):
     """Тест функции окончательной сортировки и подсчёта типа транзакций"""
-    choice = {"description": "Перевод организации", "currency_code": "PEN"}
+    choice = {"currency_code": "PEN"}
     final_countdown, count_category = final_calculation(filterd_csv_by_executed, choice)
-    assert count_category == Counter({"Перевод организации": 1})
+    assert count_category == Counter({'PEN': 1})
     assert final_countdown == expected_final_calculation
-    choice = {"description": "Перевод организации", "currency_code": "RUB"}
+    choice = {"currency_code": "RUB"}
     with pytest.raises(SystemExit) as message:
         final_countdown, count_category = final_calculation(filterd_csv_by_executed, choice)
     assert str(message.value) == "Даные по выбранным критериям не обнаружены.\nРабота программы завершена."

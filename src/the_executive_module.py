@@ -95,18 +95,38 @@ def filter_by_status(loaded_data: list | dict, search_line: str) -> list[dict]:
     return filtered_data
 
 
-def final_calculation(transactions_by_status: list | dict, choice: dict) -> any:
-    """Функция окончательной сортировки и подсчёта типа транзакций"""
-    df = pd.DataFrame(transactions_by_status)
-    title = list(itertools.islice(choice.keys(), 1))
-    filter_1 = df[title[0]] == choice[title[0]]
-    if choice.get('currency_code'):
-        title = list(itertools.islice(choice.keys(), 2))
-        filter_2 = df[title[1]] == choice[title[1]]
-        filtered_df = df[filter_1 & filter_2]
+def filter_by_description(transactions_by_status: list[dict], search_line: str) -> list[dict]:
+    """Функция фильтрации данных по типу "description" """
+    filtered_data = []
+    logger.info("Старт")
+    for i in range(0, len(transactions_by_status)):
+        try:
+            x = transactions_by_status[i]["description"]
+            if re.search(search_line, x):
+                filtered_data.append(transactions_by_status[i])
+        except Exception as ex:
+            logger.error(f"ОШИБКА: {ex}- {transactions_by_status[i]}, тип словаря: {type(transactions_by_status[i])}, "
+                         f"Длина словаря: {len(transactions_by_status[i])}. Продолжаем")
+            continue
+    if len(filtered_data) == 0:
+        logger.info(f"Данных со статусом {search_line} не обнаружено.")
+        exit(f"Транзакции типа {search_line} отсутствуют.\nРабота программы завершена.")
     else:
+        logger.info(f"Операции отфильтрованы по типу {search_line} и возвращены. Функция завершена.")
+        print("Операции отфильтрованы по типу", ''.join(search_line))
+    return filtered_data
+
+
+def final_calculation(transactions_by_description: list[dict], choice: dict) -> any:
+    """Функция окончательной сортировки и подсчёта типа транзакций"""
+    filtered_df = None
+    count_category = None
+    df = pd.DataFrame(transactions_by_description)
+    if len(choice) != 0:
+        title = list(itertools.islice(choice.keys(), 1))
+        filter_1 = df[title[0]] == choice[title[0]]
         filtered_df = df[filter_1]
-    count_category = Counter(filtered_df[title[0]])
+        count_category = Counter(filtered_df[title[0]])
     filtered_transactions = filtered_df.to_dict("records")
     logger.info(f"Функция final_calculation выполнена {filtered_transactions}, {count_category}")
     if len(filtered_transactions) == 0:

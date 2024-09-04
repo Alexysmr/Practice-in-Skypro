@@ -5,7 +5,7 @@ import re
 import numpy as np
 
 from src.masks import get_mask_card_number
-from src.the_executive_module import filter_by_status, final_calculation, read_transactions_data
+from src.the_executive_module import filter_by_status, filter_by_description, final_calculation, read_transactions_data
 from src.widget import get_date
 
 transactions = [
@@ -79,7 +79,7 @@ logger.info("Старт кода")
 def main():
     """Основная функци взаимодействия с пользователем"""
     x = None
-    choice = {"description": "-"}
+    choice = {}
     f_type = input("Здравствуйте! Добро пожаловать в программу работы с банковскими транзакциями."
                    f"\nВыберите номер необходимого пункта меню\n{shablon_1}")
     n = 0
@@ -119,10 +119,8 @@ def main():
             logger.info(f"По умолчанию выбран статус {search_line}.")
 
     transactions_by_status = filter_by_status(loaded_data, search_line)  # Фильтрация по статусу
-    # print(type(transactions_by_status))
 
     for i in transactions_by_status:  # Сокрытие номеров карт и счетов маской
-        # print(i)
         if i.get("from"):
             bank_cell_from = i["from"]
             try:
@@ -197,16 +195,21 @@ def main():
                 number_choice = list_status[0]
                 print(f'По умолчанию выбран статус {number_choice}')
                 logger.info(f"По умолчанию выбран статус {number_choice}.")
-        if number_choice == "1": choice["description"] = description_type[0]
-        if number_choice == "2": choice["description"] = description_type[1]
-        if number_choice == "3": choice["description"] = description_type[2]
-        if number_choice == "4": choice["description"] = description_type[3]
-        if number_choice == "5": choice["description"] = description_type[4]
-        final_countdown, count_category = final_calculation(transactions_by_status, choice)
+        if number_choice == "1": search_line = description_type[0]
+        if number_choice == "2": search_line = description_type[1]
+        if number_choice == "3": search_line = description_type[2]
+        if number_choice == "4": search_line = description_type[3]
+        if number_choice == "5": search_line = description_type[4]
+
+        # Фильтрация транзакций по значению ключа "description"
+        transaction_by_description = filter_by_description(transactions_by_status, search_line)
+
+        final_countdown, count_category = final_calculation(transaction_by_description, choice)
         logger.info("Данные из final_calculation возвращены")
         for i in count_category:
             x = count_category[i]
         print(f"\nРаспечатываю итоговый список транзакций:\n\nВсего банковских операций в выборке: {x}")
+
         for i in final_countdown:
             if i.get("description") == "Открытие вклада" and i.get("from") is np.nan or i.get("from") == "":
                 i["from"] = ""
