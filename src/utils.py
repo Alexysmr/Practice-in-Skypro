@@ -39,7 +39,7 @@ main_path = Path(__file__).resolve().parents[1]
 dotenv_path = os.path.join(main_path, ".apisett.env")
 if os.path.exists(dotenv_path):
     load_dotenv(dotenv_path)
-user_settings_path = os.path.join(main_path, "data", "user_settings.json")
+user_settings_path = os.path.join(main_path, "user_settings.json")
 if os.path.exists(user_settings_path) and os.stat(user_settings_path).st_size != 0:
     with open(user_settings_path, encoding="utf-8") as f:
         json_data = json.load(f)
