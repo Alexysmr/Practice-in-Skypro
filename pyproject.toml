@@ -29,7 +29,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.flake8]
 max-line-length = 119
-ignore = ["E203", "W503"]
+ignore = ["E203", "W503", "E701"]
 exclude =[".git", "__pycache__", "venv", ".venv"]
 
 
