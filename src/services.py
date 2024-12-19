@@ -33,7 +33,6 @@ category_and_description = []  # Категории и Описание
 def searche_line(data_df: DataFrame) -> str:
     """Функция вывода всех вариантов Категории и Описания и выбора пользователем одного из них"""
     logger.info("Старт")
-    print("searche_line strt")
     count_category = Counter(data_df[columns_list[7]])
     count_description = Counter(data_df[columns_list[8]])
     for key in count_category:
@@ -49,7 +48,7 @@ def searche_line(data_df: DataFrame) -> str:
     sign = input(
         "Выберите вариант, по которому необходимо произвести отбор транзакций,\n"
         "из списка выше и введите, отбор будет производиться из всех данных:-> "
-    ).capitalize()
+    )  # .capitalize()
     if sign not in category_and_description:
         logger.info("Введён отсутствующий вариант, предлагается ещё попытка")
         sign = input(
@@ -57,24 +56,21 @@ def searche_line(data_df: DataFrame) -> str:
             "существующий вариант из списка выше:-> "
         ).capitalize()
         if sign not in category_and_description:
-            logger.info("Второй раз введён остуствующий вариант. Работа функции завершена по exit")
+            logger.info("Второй раз введён остуствующий вариант. Работа функции завершена")
             print("Такой категории нет в списке. Работа функции завершена.")
             sign = ""
             return sign
         else:
             logger.info("со второй попытки значение строки поиска для фильтрации транзакций получена, возвращена")
-            print("Функция searche_line выполнена")
             return sign
     else:
         logger.info("Значение строки поиска для фильтрации транзакций получена, возвращена")
-        print("searche_line endd")
         return sign
 
 
 def simple_search(string_search: str, data_list_dict: list[dict]) -> json:
-    """Функция отбора транзакций по выбранному из Категории или Описания пользователем значению"""
+    """Функция отбора транзакций по выбранному из Категории или Описания пользователем значению из всех данных"""
     logger.info("Старт")
-    print("simple_search strt")
     sign = string_search
     if sign == "":
         print("Функция simple_search прервана")
@@ -91,5 +87,4 @@ def simple_search(string_search: str, data_list_dict: list[dict]) -> json:
     logger.info("Данные в filter_by_sign_dict в ключе Дата операции преобразованы из timestamp в str")
     filter_by_sign_json = json.dumps(filter_by_sign_dict, ensure_ascii=False, indent=4)
     logger.info("filter_by_sign_dict преобразован в filter_by_sign_json и возвращён")
-    print("simple_search endd")
     return filter_by_sign_json

@@ -50,7 +50,6 @@ if os.path.exists(user_settings_path) and os.stat(user_settings_path).st_size !=
 def currency_exchange_rate() -> list[dict]:
     """Получение текущего курса валют посредством API"""
     logger.info("Старт")
-    print("currency_exchange_rate strt")
     headers_currency = {"apikey": f"{os.getenv('API_LAYER_KEY')}"}
     currency_rates = []
     payload = {}
@@ -71,14 +70,12 @@ def currency_exchange_rate() -> list[dict]:
             logger.info(f"Проблемы {ex}")
             currency_rates.append({"currency": currency, "rate": "Ошибка получения курса"})
             continue
-    print("currency_exchange_rate endd")
     return currency_rates
 
 
 def get_stocks_price() -> list[dict]:
     """Получение курса акций посредством API"""
     logger.info("Старт")
-    print("get_stocks_price strt")
     price_of_stocks = []
     for stock in stocks:
         url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={stock}&apikey=\
@@ -92,14 +89,12 @@ def get_stocks_price() -> list[dict]:
             price_of_stocks.append({"stock": stock, "price": "Ошибка получения курса акций"})
             logger.info(f"Ошибка {stock} {ex} получения курса акций ")
             continue
-    print("get_stocks_price endd")
     return price_of_stocks
 
 
 def read_transactions_data(file_name: str) -> tuple[DataFrame, list[Any]]:
     """Функция чтения и подготовки данных"""
     logger.info("Старт кода чтения из XLSX")
-    print("read_transactions_data strt")
     file_path = os.path.join(main_path, "data", file_name)
     loaded_data = []
     cl = columns_list
@@ -112,13 +107,14 @@ def read_transactions_data(file_name: str) -> tuple[DataFrame, list[Any]]:
             m = transform_data[k]
             if m.get("Кэшбэк", 0) == "":
                 m["Кэшбэк"] = 0
+            if type(m.get(f"{cl[0]}")) is str and m.get(f"{cl[0]}") != "":
+                m[f"{cl[0]}"] = parser.parse(m.get(f"{cl[0]}"))
             if (
                 type(m) is not dict
                 or len(m) == 0
                 or m.get(f"{cl[0]}") == ""
                 or m.get(f"{cl[0]}") > datetime_now
-                or m.get(f"{cl[2]}") == ""
-                or m.get(f"{cl[2]}") == "FAILED"
+                or m.get(f"{cl[2]}") != "OK"
                 or m.get(f"{cl[3]}") == ""
                 or m.get(f"{cl[4]}") == ""
                 or m.get(f"{cl[5]}") == ""
@@ -136,7 +132,6 @@ def read_transactions_data(file_name: str) -> tuple[DataFrame, list[Any]]:
     if len(loaded_data) != 0:
         logger.info("XLSX считан, преобразован в DF, возвращен")
         data_from_file_df = pd.DataFrame(loaded_data)
-        print("read_transactions_data endd")
         return data_from_file_df, loaded_data
     else:
         logger.info(
@@ -146,9 +141,8 @@ def read_transactions_data(file_name: str) -> tuple[DataFrame, list[Any]]:
 
 
 def the_beginning_of_the_event():
-    """Функция получения у пользователя даты и периода"""
+    """Функция получения от пользователя даты и периода"""
     logger.info("Старт")
-    print("the_beginning_of_the_event strt")
     current_datetime = None
     period_list = ["W", "M", "Y", "ALL", "Ь", "Ц", "Н", "ФДД"]
     input_date = input(
@@ -199,5 +193,4 @@ def the_beginning_of_the_event():
         period = "ALL"
         print("Будет произведён анализ всех доступных транзакций до выбранной даты")
     logger.info(f"Выбор даты: {current_datetime}, Период: {period}")
-    print("the_beginning_of_the_event endd")
     return current_datetime, period

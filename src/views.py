@@ -44,7 +44,6 @@ datetime_now = parser.parse(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"
 
 def filtering_transactions(data_df: DataFrame, current_datetime: datetime, period: str) -> any:
     """Фильтрация и сортировка транзакций по заданным параметрам"""
-    print("filtering_transactions strt")
     df = data_df
     logger.info("Старт")
     count_category_list = []
@@ -58,18 +57,29 @@ def filtering_transactions(data_df: DataFrame, current_datetime: datetime, perio
     year = current_datetime.year
     month = current_datetime.month
     number_of_week = current_datetime.isocalendar()[1]
+    logger.info(f"Выбрана дата : {current_datetime}")
     if period == "W":
         filter_by_date_df = df[
             (df["number_of_week"] == number_of_week) & (df[columns_list[0]].dt.strftime("%Y").astype("int") == year)
         ]
     elif period == "Y":
-        filter_by_date_df = df[(df[columns_list[0]].dt.strftime("%Y").astype("int") == year)]
+        filter_by_date_df = df[
+            (df[columns_list[0]].dt.strftime("%Y").astype("int") == year) & (df[columns_list[0]] <= datetime_now)
+        ]
     elif period == "M":
         start_month_date = datetime.datetime(year, month, 1, 0, 0, 0)
-        filter_by_date_df = df[(df[columns_list[0]] >= start_month_date) & (df[columns_list[0]] <= current_datetime)]
+        filter_by_date_df = df[
+            (df[columns_list[0]].dt.strftime("%Y").astype("int") == year)
+            & (df[columns_list[0]].dt.strftime("%m").astype("int") == month)
+            & (df[columns_list[0]] >= start_month_date)
+            & (df[columns_list[0]] <= datetime_now)
+        ]
     elif period == "ALL":
-        filter_by_date_df = df[(df[columns_list[0]] < current_datetime)]  # ALL — все данные ДО указанной даты
+        filter_by_date_df = df[(df[columns_list[0]] < datetime_now)]  # ALL — все данные ДО указанной даты
     logger.info("DataFrame отфильтрован по дате и периоду")
+    if filter_by_date_df.empty:
+        logger.info("filter_by_date_df - пуст, транзакций за указанный период не обнаружено. Coda.")
+        return "Транзакций за указанный период не обнаружено. Работа функции завершена"
     filter_by_date_df = filter_by_date_df.drop("number_of_week", axis=1)  # Столбец number_of_week удаляем
     income_df = filter_by_date_df[filter_by_date_df[columns_list[3]] > 0]  # Все поступления
     filter_by_date_df = filter_by_date_df.loc[filter_by_date_df[columns_list[3]] < 0]  # Вся расходная часть
@@ -125,5 +135,4 @@ def filtering_transactions(data_df: DataFrame, current_datetime: datetime, perio
     logger.info("Курсы валют и курсы акций добавлены в отчёт")
     event_response_json = json.dumps(event_response, ensure_ascii=False, indent=4)
     logger.info("Весь отчёт по транзакциям: сформирован и преобразован в JSON формат, выведен в консоль, возвращён")
-    print("filtering_transactions endd")
     return event_response_json

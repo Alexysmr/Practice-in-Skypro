@@ -24,7 +24,6 @@ datetime_now = parser.parse(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"
 def choice_options(data_df: pd.DataFrame) -> tuple[str, str]:
     """Функция получения и подготовки параметров для передачи в функцию spending_by_category"""
     logger.info("Старт")
-    print("choice_options strt")
     current_datetime = None
     category_list = []
     count_category = Counter(data_df["Категория"])
@@ -76,31 +75,27 @@ def choice_options(data_df: pd.DataFrame) -> tuple[str, str]:
             logger.info(f"Со второй попытки выбор сделан {category}")
     else:
         logger.info(f"Выбор сделан: {category}, {str(current_datetime)}. Данные возвращены")
-    print("choice_options endd")
     return category, str(current_datetime)
 
 
 def decorator_spending(func):
     def wrapper(*args, output_file_name="Отчёт"):
-        print("decorator_spending strt")
         input_file_name = input("Введите название файла отчёта или нажмите Enter: ")
         if input_file_name != "":
             output_file_name = input_file_name
         print("Файл отчёта: ", f"{output_file_name}.xlsx")
-        output_data = func(*args)
-        if type(output_data) is pd.DataFrame:
-            output_data.to_excel(f"{main_path}/reports/{output_file_name}.xlsx", index=False)
+        filter_transactions_df = func(*args)
+        if type(filter_transactions_df) is pd.DataFrame:
+            filter_transactions_df.to_excel(f"{main_path}/reports/{output_file_name}.xlsx", index=False)
             logger.info("Декоратор записи отбора транзакций за 3 месяца до указанной даты в формате XLSX выполнен")
-        print("decorator_spending endd")
-
+        return filter_transactions_df
     return wrapper
 
 
 @decorator_spending
 def spending_by_category(transactions: pd.DataFrame, category: str, date: Optional[str] = None) -> pd.DataFrame | str:
-    """Функция фильтрации транзакций по параметрам запроса пользователя"""
+    """Функция фильтрации транзакций за 3 месяца по параметрам запроса пользователя"""
     logger.info("Старт")
-    print("spending_by_category strt")
     if date == "" or date is None or date == "None":
         date = datetime_now
     else:
@@ -115,17 +110,14 @@ def spending_by_category(transactions: pd.DataFrame, category: str, date: Option
     ]
 
     logger.info("Транзакции отфильтрованы в соответствии с запросом пользователя")
-    print(f"Отбор транзакций будет произведён с {start_date.date()} по {date.date()} по категории " f'"{category}"')
+    print(f'Отбор транзакций будет произведён с {start_date.date()} по {date.date()} по категории  "{category}"')
     if filter_transactions_df.empty:
         filter_transactions_df = (
-            f'Транзакции по категории "{category}" в периоде с {start_date.date()} по ' f"{date.date()}не обнаружены"
+            f'Транзакции по категории "{category}" в периоде с {start_date.date()} по {date.date()} не обнаружены'
         )
         logger.info("По заданным параметрам транзакции не обнаружены")
+
     else:
-        pd.set_option("display.max_rows", None)
-        pd.set_option("display.max_columns", None)
-        pd.set_option("display.width", None)
         logger.info("Отфильтрованные транзакции возвращены в формате DataFrame")
-    print(filter_transactions_df)
-    print("spending_by_category endd")
+
     return filter_transactions_df
