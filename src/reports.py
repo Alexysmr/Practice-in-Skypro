@@ -9,6 +9,7 @@ import dateutil.relativedelta
 import pandas as pd
 from dateutil import parser
 
+
 main_path = Path(__file__).resolve().parents[1]
 logger = logging.getLogger("__name__")
 logger.setLevel(logging.DEBUG)
@@ -78,16 +79,13 @@ def choice_options(data_df: pd.DataFrame) -> tuple[str, str]:
     return category, str(current_datetime)
 
 
-def decorator_spending(func):
-    def wrapper(*args, output_file_name="Отчёт"):
-        input_file_name = input("Введите название файла отчёта или нажмите Enter: ")
-        if input_file_name != "":
-            output_file_name = input_file_name
-        print("Файл отчёта: ", f"{output_file_name}.xlsx")
+def decorator_spending(func, output_file_name=f"{main_path}/reports/reports.json"):
+    """Декоратор - производит запись в файл результат, возвращаемый функцией, формирующей отчёт"""
+    def wrapper(*args):
         filter_transactions_df = func(*args)
         if type(filter_transactions_df) is pd.DataFrame:
-            filter_transactions_df.to_excel(f"{main_path}/reports/{output_file_name}.xlsx", index=False)
-            logger.info("Декоратор записи отбора транзакций за 3 месяца до указанной даты в формате XLSX выполнен")
+            filter_transactions_df.to_json(path_or_buf=output_file_name, orient="records", force_ascii=False, indent=4)
+            logger.info("Декоратор записи отбора транзакций за 3 месяца до указанной даты в формате JSON выполнен")
         return filter_transactions_df
     return wrapper
 
