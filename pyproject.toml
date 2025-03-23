@@ -8,6 +8,10 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 requests = "^2.32.3"
+python-dotenv = "^1.0.1"
+pandas = "^2.2.2"
+openpyxl = "^3.1.5"
+sheet2dict = "^0.1.5"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -26,7 +30,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.flake8]
 max-line-length = 119
-ignore = ["E203", "W503"]
+ignore = ["E203", "W503", "E701"]
 exclude =[".git", "__pycache__", "venv", ".venv"]
 
 
